@@ -243,6 +243,17 @@
 
     </div>
 
+    <!-- Fullscreen Lightbox Overlay (MOVED HERE to avoid script errors) -->
+    <div id="lightbox"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xl opacity-0 pointer-events-none transition-opacity duration-500">
+        <button id="close-lightbox"
+            class="absolute top-6 right-6 w-12 h-12 rounded-full glass-button flex items-center justify-center z-[110] hover:bg-white/20 transition-all cursor-pointer">
+            <i data-lucide="x" class="w-6 h-6 text-white"></i>
+        </button>
+        <img id="lightbox-img" src="" alt="Expanded Artwork"
+            class="max-w-[95vw] max-h-[90vh] object-contain rounded-2xl shadow-2xl scale-95 transition-transform duration-500">
+    </div>
+
     <!-- Application Logic -->
     <script>
         // Initialize Lucide Icons
@@ -451,9 +462,14 @@
         // Function to update card classes based on currentIndex
         function updateGallery() {
             const cards = document.querySelectorAll('.gallery-card');
+            const total = galleryData.length;
 
             cards.forEach((card, index) => {
-                const offset = index - currentIndex;
+                let offset = index - currentIndex;
+
+                // Adjust for true circular/infinite loop
+                if (offset < -Math.floor(total / 2)) offset += total;
+                if (offset > Math.floor(total / 2)) offset -= total;
 
                 // Remove all positional classes first
                 card.classList.remove('card-active', 'card-left-1', 'card-right-1', 'card-left-2', 'card-right-2', 'card-hidden-left', 'card-hidden-right');
@@ -475,6 +491,12 @@
                     card.classList.add('card-hidden-right');
                 }
             });
+
+            // Update bottom artist info dynamically
+            const artistNameEl = document.querySelector('#artist-info .font-semibold');
+            if (artistNameEl && galleryData[currentIndex]) {
+                artistNameEl.textContent = galleryData[currentIndex].artist;
+            }
         }
 
         // Controls
@@ -498,7 +520,7 @@
             startAutoSlide(); // Reset timer
         });
 
-        // --- NEW: Lightbox Logic ---
+        // --- Lightbox Logic ---
         const lightbox = document.getElementById('lightbox');
         const lightboxImg = document.getElementById('lightbox-img');
         const closeLightboxBtn = document.getElementById('close-lightbox');
@@ -541,17 +563,6 @@
         startAutoSlide();
 
     </script>
-
-    <!-- Fullscreen Lightbox Overlay -->
-    <div id="lightbox"
-        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xl opacity-0 pointer-events-none transition-opacity duration-500">
-        <button id="close-lightbox"
-            class="absolute top-6 right-6 w-12 h-12 rounded-full glass-button flex items-center justify-center z-[110] hover:bg-white/20 transition-all cursor-pointer">
-            <i data-lucide="x" class="w-6 h-6 text-white"></i>
-        </button>
-        <img id="lightbox-img" src="" alt="Expanded Artwork"
-            class="max-w-[95vw] max-h-[90vh] object-contain rounded-2xl shadow-2xl scale-95 transition-transform duration-500">
-    </div>
 </body>
 
 </html>

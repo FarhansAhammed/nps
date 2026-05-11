@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>National Public School, Karukone | A School as a Beacon of Light</title>
-    <meta name="description" content="National Public School, Karukone - 19 years of excellence in education. Managed by National Educational and Cultural Charitable Trust.">
+    <meta name="description" content="National Public School, Karukone - 25 years of excellence in education. Managed by National Educational and Cultural Charitable Trust.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     
@@ -15,6 +15,8 @@
     <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         :root {
@@ -121,7 +123,7 @@
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         @media (max-width: 768px) {
-            #hero { align-items: flex-start; padding-top: 20vh; }
+            #hero { align-items: flex-start; padding-top: 15vh; }
         }
         #hero::before {
             content: '';
@@ -146,11 +148,55 @@
             opacity: 0.3;
         }
         .hero-title {
-            font-size: clamp(3rem, 10vw, 12rem);
+            font-size: clamp(3rem, 8vw, 10rem);
             white-space: nowrap;
             letter-spacing: -0.02em;
-            text-align: center;
         }
+
+        /* 3D Gallery Card Styles from slide.html */
+        .perspective-container {
+            perspective: 1200px;
+            transform-style: preserve-3d;
+        }
+        .gallery-card {
+            position: absolute;
+            transition: all 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transform-origin: center center;
+            will-change: transform, opacity;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .card-active {
+            z-index: 10;
+            transform: translateX(0) translateZ(50px) rotateY(0deg) scale(1);
+            opacity: 1;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+        .card-left-1 {
+            z-index: 5;
+            transform: translateX(-40%) translateZ(-100px) rotateY(-25deg) scale(0.85);
+            opacity: 0.6;
+        }
+        .card-right-1 {
+            z-index: 5;
+            transform: translateX(40%) translateZ(-100px) rotateY(25deg) scale(0.85);
+            opacity: 0.6;
+        }
+        .card-hidden {
+            transform: translateZ(-400px) scale(0.5);
+            opacity: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .card-details {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            padding: 1.5rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: white;
+            transition: opacity 0.5s;
+        }
+        .gallery-card:not(.card-active) .card-details { opacity: 0; }
 
         /* Values List */
         .value-row {
@@ -254,52 +300,6 @@
             margin-bottom: -1vw;
             white-space: nowrap;
         }
-
-        /* Marquee */
-        .marquee-wrapper {
-            white-space: nowrap;
-            padding: 8rem 0 2rem 0;
-            position: relative;
-            z-index: 10;
-            transform-style: preserve-3d;
-        }
-        .marquee-content {
-            display: inline-block;
-            animation: marquee 30s linear infinite;
-        }
-        .marquee-text {
-            font-size: clamp(4rem, 18vw, 20rem);
-            padding-right: 50px;
-        }
-        @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        .footer-images {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 20;
-            transform-style: preserve-3d;
-        }
-        .footer-img {
-            position: absolute;
-            width: 280px;
-            height: 200px;
-            object-fit: cover;
-            opacity: 0;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
-            border-radius: 8px;
-            will-change: transform, opacity;
-        }
-        @media (max-width: 768px) {
-            .footer-img { width: 150px; height: 110px; }
-        }
-        .f-img-1 { top: 15%; left: 10%; z-index: 21; }
-        .f-img-2 { top: 45%; left: 30%; z-index: 25; width: 350px; height: 230px;}
-        .f-img-3 { top: 25%; left: 60%; z-index: 22; }
-        .f-img-4 { top: 55%; left: 75%; z-index: 24; width: 230px; height: 320px;}
 
         /* Navigation */
         nav a {
@@ -424,13 +424,23 @@
     <!-- Hero Section -->
     <section id="hero">
         <canvas id="waveCanvas"></canvas>
-        <div class="relative z-10 w-full flex flex-col items-center pt-10 px-6">
-            <h1 class="hero-title title-font">
-                <span class="block text-outline hero-text-anim">NATIONAL</span>
-                <span class="block hero-text-anim">PUBLIC</span>
-                <span class="block hero-text-anim">SCHOOL</span>
-            </h1>
-            <p class="hero-text-anim mt-8 text-sm tracking-[0.3em] uppercase opacity-60 text-center">Karukone — Beacon of Light</p>
+        <div class="relative z-10 w-full h-full flex flex-col md:flex-row items-center justify-center md:justify-between px-6 md:px-20 pt-20 md:pt-0 gap-10">
+            <!-- Text Content -->
+            <div class="flex flex-col items-center md:items-start text-center md:text-left">
+                <h1 class="hero-title title-font">
+                    <span class="block text-outline hero-text-anim">NATIONAL</span>
+                    <span class="block hero-text-anim">PUBLIC</span>
+                    <span class="block hero-text-anim">SCHOOL</span>
+                </h1>
+                <p class="hero-text-anim mt-8 text-sm tracking-[0.3em] uppercase opacity-60">Karukone — Beacon of Light</p>
+            </div>
+
+            <!-- 3D Slider Container -->
+            <div class="perspective-container w-full md:w-[450px] h-[350px] md:h-[500px] flex items-center justify-center overflow-visible">
+                <div id="gallery-container" class="relative w-full h-full flex items-center justify-center">
+                    <!-- Cards will be injected here -->
+                </div>
+            </div>
         </div>
 
         <!-- Scroll Circle -->
@@ -591,11 +601,73 @@
     </footer>
 
     <script>
-        // --- 1. Theme Toggle ---
+        // --- 1. Gallery Data for 3D Slider ---
+        const sliderImages = [
+            { path: "/gallery/isro visit/64.jpeg", category: "ISRO Visit" },
+            { path: "/gallery/anniversary/1.jpeg", category: "Anniversary" },
+            { path: "/gallery/anniversary/10.jpeg", category: "Anniversary" },
+            { path: "/gallery/onam celebration/65.jpeg", category: "Onam" },
+            { path: "/gallery/republic day/86.jpeg", category: "Republic Day" },
+            { path: "/gallery/yoga/93.jpeg", category: "Yoga" },
+            { path: "/gallery/environmental day/51.jpeg", category: "Environmental Day" },
+            { path: "/gallery/free eye camp/61.jpeg", category: "Free Eye Camp" },
+            { path: "/gallery/quiz/81.jpeg", category: "Quiz" },
+            { path: "/gallery/war protest/90.jpeg", category: "War Protest" }
+        ];
+
+        // Shuffle images
+        sliderImages.sort(() => Math.random() - 0.5);
+
+        let currentIndex = 0;
+        const container = document.getElementById('gallery-container');
+
+        function createSlider() {
+            sliderImages.forEach((img, index) => {
+                const card = document.createElement('div');
+                card.className = `gallery-card w-[280px] md:w-[350px] h-[380px] md:h-[450px] overflow-hidden`;
+                card.dataset.index = index;
+                card.innerHTML = `
+                    <img src="${img.path}" alt="${img.category}" class="w-full h-full object-cover">
+                    <div class="card-details">
+                        <p class="text-[10px] tracking-widest uppercase opacity-60 mb-1">School Event</p>
+                        <h3 class="title-font text-2xl md:text-3xl">${img.category}</h3>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            updateSlider();
+        }
+
+        function updateSlider() {
+            const cards = document.querySelectorAll('.gallery-card');
+            cards.forEach((card, index) => {
+                const offset = index - currentIndex;
+                card.classList.remove('card-active', 'card-left-1', 'card-right-1', 'card-hidden');
+
+                if (offset === 0) {
+                    card.classList.add('card-active');
+                } else if (offset === -1) {
+                    card.classList.add('card-left-1');
+                } else if (offset === 1) {
+                    card.classList.add('card-right-1');
+                } else {
+                    card.classList.add('card-hidden');
+                }
+            });
+        }
+
+        function autoSlide() {
+            currentIndex = (currentIndex + 1) % sliderImages.length;
+            updateSlider();
+        }
+
+        setInterval(autoSlide, 3500);
+        createSlider();
+
+        // --- 2. Theme Toggle ---
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
 
-        // Check for saved theme
         if (localStorage.getItem('theme') === 'light') {
             body.classList.add('light-mode');
         }
@@ -603,12 +675,10 @@
         themeToggle.addEventListener('click', () => {
             body.classList.toggle('light-mode');
             localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
-            
-            // Redraw wave canvas for theme
             ctx.strokeStyle = body.classList.contains('light-mode') ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
         });
 
-        // --- 2. Mobile Menu Toggle ---
+        // --- 3. Mobile Menu Toggle ---
         const menuBtn = document.getElementById('menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
         const menuLines = menuBtn.querySelectorAll('span');
@@ -629,7 +699,7 @@
             });
         });
 
-        // --- 3. Lenis Smooth Scroll ---
+        // --- 4. Lenis Smooth Scroll ---
         const lenis = new Lenis({
             duration: 1.2,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -642,23 +712,15 @@
         });
 
         lenis.on('scroll', ScrollTrigger.update);
-
-        gsap.ticker.add((time) => {
-            lenis.raf(time * 1000);
-        });
+        gsap.ticker.add((time) => { lenis.raf(time * 1000); });
         gsap.ticker.lagSmoothing(0, 0);
 
-        // --- 4. Custom Cursor ---
+        // --- 5. Custom Cursor ---
         const cursor = document.getElementById('cursor');
         const hoverTargets = document.querySelectorAll('.hover-target, a, button, input, textarea');
 
         document.addEventListener('mousemove', (e) => {
-            gsap.to(cursor, {
-                x: e.clientX,
-                y: e.clientY,
-                duration: 0.1,
-                ease: "power2.out"
-            });
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1, ease: "power2.out" });
         });
 
         hoverTargets.forEach(target => {
@@ -666,7 +728,7 @@
             target.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
         });
 
-        // --- 5. Hero Wave Canvas Animation ---
+        // --- 6. Hero Wave Canvas Animation ---
         const canvas = document.getElementById('waveCanvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -683,17 +745,11 @@
             ctx.clearRect(0, 0, width, height);
             ctx.strokeStyle = body.classList.contains('light-mode') ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
             ctx.lineWidth = 1;
-
             const waveCount = window.innerWidth < 768 ? 12 : 20;
-
             for (let i = 0; i < waveCount; i++) {
                 ctx.beginPath();
                 for (let x = 0; x <= width; x += 30) {
-                    let y = height / 2 + 
-                            Math.sin(x * 0.002 + time + i * 0.15) * 60 + 
-                            Math.cos(x * 0.0015 - time + i * 0.1) * 100 +
-                            (i * 40) - 400; 
-                    
+                    let y = height / 2 + Math.sin(x * 0.002 + time + i * 0.15) * 60 + Math.cos(x * 0.0015 - time + i * 0.1) * 100 + (i * 40) - 400; 
                     if (x === 0) ctx.moveTo(x, y);
                     else ctx.lineTo(x, y);
                 }
@@ -704,171 +760,45 @@
         }
         drawWaves();
 
-        // --- 6. GSAP Scroll Animations ---
+        // --- 7. GSAP Scroll Animations ---
         gsap.registerPlugin(ScrollTrigger);
-
-        // Hero Parallax
-        gsap.to('.hero-text-anim', {
-            y: 100,
-            opacity: 0,
-            stagger: 0.1,
-            scrollTrigger: {
-                trigger: '#hero',
-                start: 'top top',
-                end: 'bottom top',
-                scrub: true
-            }
-        });
-
-        // Section Theme Toggle (GSAP trigger)
-        ScrollTrigger.create({
-            trigger: "#light-theme-trigger",
-            start: "top center",
-            end: "bottom bottom",
-            onEnter: () => !body.classList.contains('light-mode') && body.classList.replace('theme-dark', 'theme-light'),
-            onLeaveBack: () => !body.classList.contains('light-mode') && body.classList.replace('theme-light', 'theme-dark'),
-        });
-
-        // Scaling Cross
+        gsap.to('.hero-text-anim', { y: 100, opacity: 0, stagger: 0.1, scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true } });
+        ScrollTrigger.create({ trigger: "#light-theme-trigger", start: "top center", end: "bottom bottom", onEnter: () => !body.classList.contains('light-mode') && body.classList.replace('theme-dark', 'theme-light'), onLeaveBack: () => !body.classList.contains('light-mode') && body.classList.replace('theme-light', 'theme-dark'), });
         const crossSection = document.getElementById('cross-section');
         const cross = document.getElementById('scaling-cross');
-
-        gsap.to(cross, {
-            scale: 100,
-            ease: "power2.inOut",
-            scrollTrigger: {
-                trigger: crossSection,
-                start: "top top",
-                end: "+=150%",
-                pin: true,
-                scrub: true
-            }
-        });
-
-        // Stacked Panels
+        gsap.to(cross, { scale: 100, ease: "power2.inOut", scrollTrigger: { trigger: crossSection, start: "top top", end: "+=150%", pin: true, scrub: true } });
         const panels = gsap.utils.toArray(".panel");
         panels.forEach((panel, i) => {
             const img = panel.querySelector('.panel-img');
             const title = panel.querySelector('.panel-title');
             const topText = panel.querySelector('.panel-top');
-
-            gsap.fromTo(img, 
-                { clipPath: "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)", scale: 1.5 },
-                { 
-                    clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)", 
-                    scale: 1, 
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: panel,
-                        start: "top 80%",
-                        end: "top top",
-                        scrub: 1
-                    }
-                }
-            );
-
-            gsap.from(title, {
-                y: 100,
-                scrollTrigger: {
-                    trigger: panel,
-                    start: "top bottom",
-                    end: "top top",
-                    scrub: true
-                }
-            });
-            
-            gsap.from(topText, {
-                opacity: 0,
-                y: 20,
-                scrollTrigger: {
-                    trigger: panel,
-                    start: "top 50%",
-                    end: "top top",
-                    scrub: true
-                }
-            });
+            gsap.fromTo(img, { clipPath: "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)", scale: 1.5 }, { clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)", scale: 1, ease: "power3.out", scrollTrigger: { trigger: panel, start: "top 80%", end: "top top", scrub: 1 } });
+            gsap.from(title, { y: 100, scrollTrigger: { trigger: panel, start: "top bottom", end: "top top", scrub: true } });
+            gsap.from(topText, { opacity: 0, y: 20, scrollTrigger: { trigger: panel, start: "top 50%", end: "top top", scrub: true } });
         });
-
-        // Footer Scatter
         const footerImages = document.querySelectorAll('.footer-img');
         const marqueeContainer = document.getElementById('marquee-container');
+        ScrollTrigger.create({ trigger: "footer", start: "top 60%", onEnter: () => { footerImages.forEach((img, i) => { gsap.to(img, { opacity: 1, rotationZ: gsap.utils.random(-15, 15), duration: 1.5, delay: i * 0.2, ease: "power4.out" }); }); } });
+        if (window.innerWidth > 768) { marqueeContainer.addEventListener('mousemove', (e) => { const rect = marqueeContainer.getBoundingClientRect(); const x = ((e.clientX - rect.left) / rect.width) * 2 - 1; const y = ((e.clientY - rect.top) / rect.height) * 2 - 1; gsap.to('.marquee-wrapper', { x: x * -40, y: y * -15, rotateX: y * 5, rotateY: x * -5, duration: 1, ease: "power2.out" }); footerImages.forEach((img, i) => { const depth = (i + 1) * 25; gsap.to(img, { x: x * depth, y: y * depth, rotateX: y * 15, rotateY: x * -15, duration: 1.5, ease: "power3.out" }); }); }); marqueeContainer.addEventListener('mouseleave', () => { gsap.to('.marquee-wrapper', { x: 0, y: 0, rotateX: 0, rotateY: 0, duration: 1 }); gsap.to(footerImages, { x: 0, y: 0, rotateX: 0, rotateY: 0, duration: 1 }); }); }
 
-        ScrollTrigger.create({
-            trigger: "footer",
-            start: "top 60%",
-            onEnter: () => {
-                footerImages.forEach((img, i) => {
-                    gsap.to(img, {
-                        opacity: 1,
-                        rotationZ: gsap.utils.random(-15, 15),
-                        duration: 1.5,
-                        delay: i * 0.2,
-                        ease: "power4.out"
-                    });
-                });
-            }
-        });
-
-        if (window.innerWidth > 768) {
-            marqueeContainer.addEventListener('mousemove', (e) => {
-                const rect = marqueeContainer.getBoundingClientRect();
-                const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-                const y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
-
-                gsap.to('.marquee-wrapper', {
-                    x: x * -40,
-                    y: y * -15,
-                    rotateX: y * 5,
-                    rotateY: x * -5,
-                    duration: 1,
-                    ease: "power2.out"
-                });
-
-                footerImages.forEach((img, i) => {
-                    const depth = (i + 1) * 25;
-                    gsap.to(img, {
-                        x: x * depth,
-                        y: y * depth,
-                        rotateX: y * 15,
-                        rotateY: x * -15,
-                        duration: 1.5,
-                        ease: "power3.out"
-                    });
-                });
-            });
-
-            marqueeContainer.addEventListener('mouseleave', () => {
-                gsap.to('.marquee-wrapper', { x: 0, y: 0, rotateX: 0, rotateY: 0, duration: 1 });
-                gsap.to(footerImages, { x: 0, y: 0, rotateX: 0, rotateY: 0, duration: 1 });
-            });
-        }
-
-        // --- 7. Supabase Contact Form ---
+        // --- 8. Supabase Contact Form ---
         const SUPABASE_URL = 'https://yyjhynajujbmdhndaceg.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_3fanHy-uvbdQk3sJDNcgwA_foWvxvJB';
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
         const contactForm = document.getElementById('contact-form');
         if (contactForm) {
             contactForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const btn = document.getElementById('contact-submit');
                 const originalText = btn.textContent;
-                
                 btn.textContent = 'SENDING...';
                 btn.disabled = true;
-
                 const name = document.getElementById('contact-name').value;
                 const email = document.getElementById('contact-email').value;
                 const message = document.getElementById('contact-message').value;
-
                 try {
-                    const { error } = await sb
-                        .from('contact_messages')
-                        .insert([{ name, email, message, subject: 'Website Inquiry' }]);
-
+                    const { error } = await sb.from('contact_messages').insert([{ name, email, message, subject: 'Website Inquiry' }]);
                     if (error) throw error;
-
                     alert('Thank you for your message!');
                     contactForm.reset();
                 } catch (error) {
@@ -880,7 +810,6 @@
                 }
             });
         }
-
     </script>
 </body>
 </html>
