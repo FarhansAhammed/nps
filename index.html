@@ -670,8 +670,18 @@
         function createSlider() {
             sliderImages.forEach((img, index) => {
                 const card = document.createElement('div');
-                card.className = `gallery-card w-[120px] md:w-[180px] h-[160px] md:h-[240px] overflow-hidden`;
+                card.className = `gallery-card w-[120px] md:w-[180px] h-[160px] md:h-[240px] overflow-hidden cursor-pointer hover-target`;
                 card.dataset.index = index;
+                
+                // Redirect to gallery on click/tap
+                card.addEventListener('click', () => {
+                    window.location.href = 'gallery.html';
+                });
+
+                // Custom cursor support
+                card.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+                card.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+
                 card.innerHTML = `
                     <img src="${img.path}" alt="${img.category}" class="w-full h-full object-cover">
                     <div class="card-details p-3">
