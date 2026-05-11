@@ -248,7 +248,7 @@
         // Initialize Lucide Icons
         lucide.createIcons();
 
-        // Gallery Data
+        // Gallery Data (Added 5 more images)
         const galleryData = [
             {
                 id: 1,
@@ -299,24 +299,84 @@
                 medium: "Oil and gold leaf on canvas",
                 dimensions: "180 x 180 cm",
                 image: "https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=1200&auto=format&fit=crop"
+            },
+            {
+                id: 6,
+                title: "The Great Wave",
+                artist: "Katsushika Hokusai",
+                date: "1831",
+                quote: "A timeless symbol of nature's power.",
+                medium: "Woodblock print",
+                dimensions: "10.1 x 14.9 in.",
+                image: "https://images.unsplash.com/photo-1614524451016-5688d6df1d38?q=80&w=1200&auto=format&fit=crop"
+            },
+            {
+                id: 7,
+                title: "Abstract Harmony",
+                artist: "Wassily Kandinsky",
+                date: "1923",
+                quote: "Color is a power which directly influences the soul.",
+                medium: "Oil on canvas",
+                dimensions: "150 x 200 cm",
+                image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=1200&auto=format&fit=crop"
+            },
+            {
+                id: 8,
+                title: "Modern Contours",
+                artist: "Piet Mondrian",
+                date: "1930",
+                quote: "The position of the artist is humble. He is essentially a channel.",
+                medium: "Oil on canvas",
+                dimensions: "46 x 46 cm",
+                image: "https://images.unsplash.com/photo-1550684376-efcbd6e3f031?q=80&w=1200&auto=format&fit=crop"
+            },
+            {
+                id: 9,
+                title: "Sculpted Light",
+                artist: "Auguste Rodin",
+                date: "1902",
+                quote: "Nothing is a waste of time if you use the experience wisely.",
+                medium: "Bronze",
+                dimensions: "72 in.",
+                image: "https://images.unsplash.com/photo-1548810237-7756f1ea124e?q=80&w=1200&auto=format&fit=crop"
+            },
+            {
+                id: 10,
+                title: "Renaissance Echo",
+                artist: "Sandro Botticelli",
+                date: "1485",
+                quote: "A rebirth of classical beauty and proportion.",
+                medium: "Tempera on canvas",
+                dimensions: "172.5 x 278.5 cm",
+                image: "https://images.unsplash.com/photo-1576014131341-cecb79519d08?q=80&w=1200&auto=format&fit=crop"
             }
         ];
 
-        let currentIndex = 1; // Start with The Starry Night (index 1) active
-        const container = document.getElementById('gallery-container');
-        let autoSlideInterval; // Timer variable for random sliding
+        // --- NEW: Shuffle the array to randomize images on load ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
 
-        // Function to start or reset the random auto-slide timer
+        // Randomize the images before creating the gallery
+        shuffleArray(galleryData);
+
+        let currentIndex = 0; // Always start at 0 since the array is already randomized
+        const container = document.getElementById('gallery-container');
+        let autoSlideInterval;
+
+        // Function to start or reset the auto-slide timer
         function startAutoSlide() {
             clearInterval(autoSlideInterval);
             autoSlideInterval = setInterval(() => {
-                let nextIndex;
-                // Keep picking a random index until it's different from the current one
-                do {
-                    nextIndex = Math.floor(Math.random() * galleryData.length);
-                } while (nextIndex === currentIndex && galleryData.length > 1);
-
-                currentIndex = nextIndex;
+                // Loop sequentially to maintain the visual "circle" transition
+                if (currentIndex < galleryData.length - 1) {
+                    currentIndex++;
+                } else {
+                    currentIndex = 0; // Wrap around to the start
+                }
                 updateGallery();
             }, 3000); // 3 seconds
         }
@@ -349,7 +409,7 @@
                             <button class="glass-button w-10 h-10 rounded-full flex items-center justify-center">
                                 <i data-lucide="chevron-left" class="w-5 h-5 text-white"></i>
                             </button>
-                            <button class="glass-button px-5 h-10 rounded-full flex items-center justify-center gap-2 font-medium text-sm">
+                            <button class="expand-btn glass-button px-5 h-10 rounded-full flex items-center justify-center gap-2 font-medium text-sm transition-transform hover:scale-105 active:scale-95">
                                 <i data-lucide="maximize-2" class="w-4 h-4 text-white"></i> Expand
                             </button>
                             <button class="glass-button w-10 h-10 rounded-full flex items-center justify-center">
@@ -374,6 +434,13 @@
                     </div>
                 `;
                 container.appendChild(card);
+
+                // Add event listener for Expand Button
+                const expandBtn = card.querySelector('.expand-btn');
+                expandBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // prevent triggering the card click
+                    openLightbox(item.image, item.title);
+                });
             });
 
             // Re-initialize icons inside newly created cards
@@ -431,11 +498,60 @@
             startAutoSlide(); // Reset timer
         });
 
+        // --- NEW: Lightbox Logic ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const closeLightboxBtn = document.getElementById('close-lightbox');
+
+        function openLightbox(imgSrc, title) {
+            lightboxImg.src = imgSrc;
+            lightboxImg.alt = title;
+            // Show lightbox
+            lightbox.classList.remove('opacity-0', 'pointer-events-none');
+            // Subtle zoom-in effect
+            setTimeout(() => {
+                lightboxImg.classList.remove('scale-95');
+                lightboxImg.classList.add('scale-100');
+            }, 10);
+
+            // Pause the auto-slider while viewing
+            clearInterval(autoSlideInterval);
+        }
+
+        function closeLightbox() {
+            lightbox.classList.add('opacity-0', 'pointer-events-none');
+            lightboxImg.classList.remove('scale-100');
+            lightboxImg.classList.add('scale-95');
+
+            // Resume the auto-slider
+            startAutoSlide();
+        }
+
+        closeLightboxBtn.addEventListener('click', closeLightbox);
+
+        // Close when clicking the dark background overlay
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+
         // Initialize the app and start automatic slideshow
         createGallery();
         startAutoSlide();
 
     </script>
+
+    <!-- Fullscreen Lightbox Overlay -->
+    <div id="lightbox"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xl opacity-0 pointer-events-none transition-opacity duration-500">
+        <button id="close-lightbox"
+            class="absolute top-6 right-6 w-12 h-12 rounded-full glass-button flex items-center justify-center z-[110] hover:bg-white/20 transition-all cursor-pointer">
+            <i data-lucide="x" class="w-6 h-6 text-white"></i>
+        </button>
+        <img id="lightbox-img" src="" alt="Expanded Artwork"
+            class="max-w-[95vw] max-h-[90vh] object-contain rounded-2xl shadow-2xl scale-95 transition-transform duration-500">
+    </div>
 </body>
 
 </html>
