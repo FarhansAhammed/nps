@@ -424,9 +424,9 @@
     <!-- Hero Section -->
     <section id="hero">
         <canvas id="waveCanvas"></canvas>
-        <div class="relative z-10 w-full h-full flex flex-col md:flex-row items-center justify-center md:justify-between px-6 md:px-20 pt-20 md:pt-0 gap-10">
-            <!-- Text Content -->
-            <div class="flex flex-col items-center md:items-start text-center md:text-left">
+        <div class="relative z-10 w-full h-full flex flex-col items-center justify-center px-6 pt-10">
+            <!-- Text Content (Centered) -->
+            <div class="flex flex-col items-center text-center">
                 <h1 class="hero-title title-font">
                     <span class="block text-outline hero-text-anim">NATIONAL</span>
                     <span class="block hero-text-anim">PUBLIC</span>
@@ -435,8 +435,8 @@
                 <p class="hero-text-anim mt-8 text-sm tracking-[0.3em] uppercase opacity-60">Karukone — Beacon of Light</p>
             </div>
 
-            <!-- 3D Slider Container -->
-            <div class="perspective-container w-full md:w-[450px] h-[350px] md:h-[500px] flex items-center justify-center overflow-visible">
+            <!-- 3D Slider Container (Small & Bottom Right) -->
+            <div class="perspective-container absolute bottom-24 right-10 w-[150px] md:w-[250px] h-[200px] md:h-[300px] flex items-center justify-center overflow-visible z-20 hidden sm:flex">
                 <div id="gallery-container" class="relative w-full h-full flex items-center justify-center">
                     <!-- Cards will be injected here -->
                 </div>
@@ -627,13 +627,13 @@
         function createSlider() {
             sliderImages.forEach((img, index) => {
                 const card = document.createElement('div');
-                card.className = `gallery-card w-[280px] md:w-[350px] h-[380px] md:h-[450px] overflow-hidden`;
+                card.className = `gallery-card w-[120px] md:w-[180px] h-[160px] md:h-[240px] overflow-hidden`;
                 card.dataset.index = index;
                 card.innerHTML = `
                     <img src="${img.path}" alt="${img.category}" class="w-full h-full object-cover">
-                    <div class="card-details">
-                        <p class="text-[10px] tracking-widest uppercase opacity-60 mb-1">School Event</p>
-                        <h3 class="title-font text-2xl md:text-3xl">${img.category}</h3>
+                    <div class="card-details p-3">
+                        <p class="text-[8px] tracking-widest uppercase opacity-60 mb-0.5">Event</p>
+                        <h3 class="title-font text-lg md:text-xl">${img.category}</h3>
                     </div>
                 `;
                 container.appendChild(card);
@@ -779,7 +779,7 @@
                 pin: true, 
                 scrub: true,
                 onUpdate: (self) => {
-                    if (self.progress > 0.1 && self.progress < 0.9) {
+                    if (self.progress > 0.05 && self.progress < 0.95) {
                         document.getElementById('scroll-instruction').style.opacity = 0.5;
                     } else {
                         document.getElementById('scroll-instruction').style.opacity = 0;
