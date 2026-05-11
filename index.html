@@ -444,7 +444,7 @@
         </div>
 
         <!-- Scroll Circle -->
-        <div class="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 w-16 h-16 md:w-24 md:h-24 rounded-full border border-white/30 flex items-center justify-center text-[10px] md:text-xs font-sans tracking-widest uppercase text-white hover-target cursor-pointer hero-text-anim">
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 w-16 h-16 md:w-24 md:h-24 rounded-full border border-white/30 flex items-center justify-center text-[10px] md:text-xs font-sans tracking-widest uppercase text-white hover-target cursor-pointer hero-text-anim">
             Scroll
         </div>
     </section>
@@ -492,6 +492,9 @@
     <!-- Scaling Cross Transition -->
     <section class="cross-container" id="cross-section">
         <div class="cross" id="scaling-cross"></div>
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 text-xs tracking-[0.4em] uppercase opacity-0 transition-opacity duration-500 z-[30] pointer-events-none" id="scroll-instruction">
+            Scroll further for our specialties
+        </div>
     </section>
 
     <!-- Light Theme Area (Stacked Panels) -->
@@ -766,7 +769,24 @@
         ScrollTrigger.create({ trigger: "#light-theme-trigger", start: "top center", end: "bottom bottom", onEnter: () => !body.classList.contains('light-mode') && body.classList.replace('theme-dark', 'theme-light'), onLeaveBack: () => !body.classList.contains('light-mode') && body.classList.replace('theme-light', 'theme-dark'), });
         const crossSection = document.getElementById('cross-section');
         const cross = document.getElementById('scaling-cross');
-        gsap.to(cross, { scale: 100, ease: "power2.inOut", scrollTrigger: { trigger: crossSection, start: "top top", end: "+=150%", pin: true, scrub: true } });
+        gsap.to(cross, { 
+            scale: 100, 
+            ease: "power2.inOut", 
+            scrollTrigger: { 
+                trigger: crossSection, 
+                start: "top top", 
+                end: "+=150%", 
+                pin: true, 
+                scrub: true,
+                onUpdate: (self) => {
+                    if (self.progress > 0.1 && self.progress < 0.9) {
+                        document.getElementById('scroll-instruction').style.opacity = 0.5;
+                    } else {
+                        document.getElementById('scroll-instruction').style.opacity = 0;
+                    }
+                }
+            } 
+        });
         const panels = gsap.utils.toArray(".panel");
         panels.forEach((panel, i) => {
             const img = panel.querySelector('.panel-img');
