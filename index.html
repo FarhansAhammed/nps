@@ -26,6 +26,7 @@
             --panel-1: #e2e8f0; /* Soft Blue-Gray */
             --panel-2: #fef3c7; /* Soft Amber */
             --panel-3: #d1fae5; /* Soft Emerald */
+            --transition: 0.6s cubic-bezier(0.7, 0, 0.3, 1);
         }
 
         body {
@@ -35,6 +36,12 @@
             color: var(--text-light);
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
+            transition: background-color var(--transition), color var(--transition);
+        }
+
+        body.light-mode {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
         }
 
         /* Lenis Smooth Scroll Recommended CSS */
@@ -91,14 +98,16 @@
             background: rgba(255, 255, 255, 0.05);
             transition: background 0.3s;
         }
-        .theme-light .grid-line { background: rgba(0, 0, 0, 0.05); }
+        .theme-light .grid-line, .light-mode .grid-line { background: rgba(0, 0, 0, 0.05); }
 
         .text-outline {
             color: transparent;
             -webkit-text-stroke: 1.5px var(--text-light);
         }
+        .light-mode .text-outline { -webkit-text-stroke-color: var(--text-dark); }
         @media (max-width: 768px) {
             .text-outline { -webkit-text-stroke: 1px var(--text-light); }
+            .light-mode .text-outline { -webkit-text-stroke-color: var(--text-dark); }
         }
 
         /* Hero */
@@ -111,6 +120,22 @@
             overflow: hidden;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
+        #hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('/npps.png');
+            background-size: cover;
+            background-position: center 70%;
+            background-attachment: fixed;
+            opacity: 0.35;
+            filter: grayscale(10%);
+            z-index: -2;
+        }
+        .light-mode #hero::before {
+            opacity: 0.25;
+        }
+        .light-mode #hero { border-bottom-color: rgba(0,0,0,0.1); }
         #waveCanvas {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -131,6 +156,7 @@
             position: relative;
             overflow: hidden;
         }
+        .light-mode .value-row { border-bottom-color: rgba(0,0,0,0.1); }
         .value-row::before {
             content: '';
             position: absolute;
@@ -154,6 +180,7 @@
             position: relative;
             z-index: 20;
         }
+        .light-mode .cross-container { background: var(--bg-light); }
         .cross {
             width: 15vw;
             height: 15vw;
@@ -162,6 +189,7 @@
             transform-origin: center;
             will-change: transform;
         }
+        .light-mode .cross { background: var(--bg-dark); }
 
         /* Stacked Panels */
         .light-section {
@@ -169,6 +197,10 @@
             color: var(--text-dark);
             position: relative;
             z-index: 10;
+        }
+        .light-mode .light-section {
+            background: var(--bg-dark);
+            color: var(--text-light);
         }
         .panel {
             height: 100vh;
@@ -280,6 +312,21 @@
         }
         nav a:hover::after { width: 100%; }
 
+        /* Theme Toggle Button */
+        #theme-toggle {
+            width: 40px; height: 20px; background: rgba(255,255,255,0.1);
+            border-radius: 20px; position: relative; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: background 0.3s;
+        }
+        .light-mode #theme-toggle { background: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.2); }
+        #theme-toggle::after {
+            content: ''; position: absolute; top: 2px; left: 2px;
+            width: 14px; height: 14px; background: white; border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+        .light-mode #theme-toggle::after { transform: translateX(20px); background: var(--text-dark); }
+
         /* Mobile Menu */
         #mobile-menu {
             position: fixed;
@@ -293,6 +340,7 @@
             transform: translateY(-100%);
             transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
         }
+        .light-mode #mobile-menu { background: var(--bg-light); }
         #mobile-menu.active { transform: translateY(0); }
         .mobile-link {
             font-family: 'Anton', sans-serif;
@@ -303,11 +351,13 @@
             text-decoration: none;
             transition: color 0.3s;
         }
+        .light-mode .mobile-link { color: var(--text-dark); }
         .mobile-link:hover { color: var(--accent); }
 
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        .light-mode ::-webkit-scrollbar-track { background: var(--bg-light); }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #555; }
 
@@ -331,7 +381,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="fixed top-0 w-full z-[100] flex justify-between items-center p-6 text-[10px] tracking-widest uppercase mix-blend-difference text-white">
+    <nav class="fixed top-0 w-full z-[100] flex justify-between items-center p-6 text-[12px] tracking-widest uppercase mix-blend-difference text-white">
         <div class="flex items-center gap-3">
             <img src="/logo.png" alt="NPS" class="h-10 w-auto">
             <span class="hidden sm:inline">NPS Karukone <span class="opacity-50 ml-2">Est. 1995</span></span>
@@ -347,6 +397,7 @@
         </div>
 
         <div class="flex items-center gap-6">
+            <div id="theme-toggle" class="hover-target" title="Toggle Theme"></div>
             <a href="#contact" class="hidden sm:inline hover-target">Contact</a>
             
             <!-- Hamburger Menu Button -->
@@ -375,13 +426,13 @@
                 <span class="block text-outline hero-text-anim">NATIONAL</span>
                 <span class="block flex items-center justify-center gap-4 hero-text-anim">
                     PUBLIC
-                    <div class="w-16 h-16 md:w-32 md:h-32 rounded-full border border-white flex items-center justify-center text-[8px] md:text-xs font-sans tracking-widest uppercase text-white hover-target cursor-pointer">
+                    <div class="w-16 h-16 md:w-32 md:h-32 rounded-full border border-white flex items-center justify-center text-sm font-sans tracking-widest uppercase text-white hover-target cursor-pointer">
                         Scroll
                     </div>
                 </span>
                 <span class="block hero-text-anim">SCHOOL</span>
             </h1>
-            <p class="hero-text-anim mt-8 text-[10px] md:text-sm tracking-[0.3em] uppercase opacity-60 text-center">Karukone — Beacon of Light</p>
+            <p class="hero-text-anim mt-8 text-sm tracking-[0.3em] uppercase opacity-60 text-center">Karukone — Beacon of Light</p>
         </div>
     </section>
 
@@ -391,9 +442,9 @@
             <div class="w-full md:w-1/3 p-10 md:p-20 border-b md:border-b-0 md:border-r border-white/10 flex flex-col justify-between">
                 <div>
                     <h2 class="title-font text-5xl md:text-7xl">19 YEARS OF<br>EXCELLENCE</h2>
-                    <p class="text-xs tracking-widest uppercase mt-4 opacity-50">Our Mission</p>
+                    <p class="text-sm tracking-widest uppercase mt-4 opacity-50">Our Mission</p>
                 </div>
-                <p class="text-sm opacity-60 max-w-xs mt-10 leading-relaxed">Managed by National Educational and Cultural Charitable Trust, our primary mission is imparting quality education to everyone, nurturing curiosity in a safe and inclusive environment.</p>
+                <p class="text-base opacity-60 max-w-xs mt-10 leading-relaxed">Managed by National Educational and Cultural Charitable Trust, our primary mission is imparting quality education to everyone, nurturing curiosity in a safe and inclusive environment.</p>
             </div>
             
             <div class="w-full md:w-2/3 flex flex-col" id="academics">
@@ -401,7 +452,7 @@
                 <div class="value-row flex items-center justify-between p-10 md:p-16 hover-target cursor-pointer">
                     <div class="w-3/4 z-10">
                         <h3 class="title-font text-4xl md:text-6xl mb-4">ACADEMIC EXCELLENCE</h3>
-                        <p class="text-sm opacity-70 font-sans max-w-md">Affiliated to CBSE, New Delhi. We offer a rigorous LEAD-based curriculum designed for deep conceptual clarity and long-term academic growth.</p>
+                        <p class="text-base opacity-70 font-sans max-w-md">Affiliated to CBSE, New Delhi. We offer a rigorous LEAD-based curriculum designed for deep conceptual clarity and long-term academic growth.</p>
                     </div>
                     <div class="text-outline title-font text-5xl md:text-9xl z-10 opacity-20">01</div>
                 </div>
@@ -409,7 +460,7 @@
                 <div class="value-row flex items-center justify-between p-10 md:p-16 hover-target cursor-pointer" id="facilities">
                     <div class="w-3/4 z-10">
                         <h3 class="title-font text-4xl md:text-6xl mb-4">MODERN FACILITIES</h3>
-                        <p class="text-sm opacity-70 font-sans max-w-md">A/C classrooms for early years, advanced English language labs, virtual labs, and smart digital classrooms equipped with the latest technology.</p>
+                        <p class="text-base opacity-70 font-sans max-w-md">A/C classrooms for early years, advanced English language labs, virtual labs, and smart digital classrooms equipped with the latest technology.</p>
                     </div>
                     <div class="text-outline title-font text-5xl md:text-9xl z-10 opacity-20">02</div>
                 </div>
@@ -417,7 +468,7 @@
                 <div class="value-row flex items-center justify-between p-10 md:p-16 hover-target cursor-pointer">
                     <div class="w-3/4 z-10">
                         <h3 class="title-font text-4xl md:text-6xl mb-4">HOLISTIC GROWTH</h3>
-                        <p class="text-sm opacity-70 font-sans max-w-md">Dedicated coaching for sports (Volleyball, Football, Badminton), Karate, Yoga, and our unique 'Bit of Light' weekly guidance program.</p>
+                        <p class="text-base opacity-70 font-sans max-w-md">Dedicated coaching for sports (Volleyball, Football, Badminton), Karate, Yoga, and our unique 'Bit of Light' weekly guidance program.</p>
                     </div>
                     <div class="text-outline title-font text-5xl md:text-9xl z-10 opacity-20">03</div>
                 </div>
@@ -434,15 +485,15 @@
     <div class="light-section" id="light-theme-trigger">
         
         <div class="text-center py-20 md:py-32 border-b border-black/5 flex flex-col items-center justify-center min-h-[30vh] md:min-h-[40vh] px-6">
-            <p class="text-[10px] tracking-[0.4em] uppercase mb-6">+ OUR SPECIALTIES +</p>
+            <p class="text-sm tracking-[0.4em] uppercase mb-6">+ OUR SPECIALTIES +</p>
             <h2 class="title-font text-5xl md:text-9xl">NURTURING<br>TOMORROW'S LEADERS</h2>
         </div>
 
         <!-- Panel 1 -->
         <div class="panel" style="background-color: var(--panel-1); z-index: 1;">
             <div class="panel-top">
-                <div class="max-w-xs text-sm font-medium">LEAD based curriculum ensuring conceptual clarity through digital tools and modern pedagogy.</div>
-                <div class="text-[10px] tracking-widest uppercase border border-black/20 px-4 py-1 rounded-full h-fit w-fit">Curriculum</div>
+                <div class="max-w-xs text-base font-medium">LEAD based curriculum ensuring conceptual clarity through digital tools and modern pedagogy.</div>
+                <div class="text-sm tracking-widest uppercase border border-black/20 px-4 py-1 rounded-full h-fit w-fit">Curriculum</div>
             </div>
             <div class="panel-center">
                 <img src="/gallery/isro visit/64.jpeg" class="panel-img" alt="Academic Excellence">
@@ -453,8 +504,8 @@
         <!-- Panel 2 -->
         <div class="panel" style="background-color: var(--panel-2); z-index: 2;">
             <div class="panel-top">
-                <div class="max-w-xs text-sm font-medium">Advanced Virtual Labs and English Language Labs to master communication and scientific discovery.</div>
-                <div class="text-[10px] tracking-widest uppercase border border-black/20 px-4 py-1 rounded-full h-fit w-fit">Infrastructure</div>
+                <div class="max-w-xs text-base font-medium">Advanced Virtual Labs and English Language Labs to master communication and scientific discovery.</div>
+                <div class="text-sm tracking-widest uppercase border border-black/20 px-4 py-1 rounded-full h-fit w-fit">Infrastructure</div>
             </div>
             <div class="panel-center">
                 <img src="/gallery/anniversary/10.jpeg" class="panel-img" alt="Smart Facilities">
@@ -465,8 +516,8 @@
         <!-- Panel 3 -->
         <div class="panel" style="background-color: var(--panel-3); z-index: 3;">
             <div class="panel-top">
-                <div class="max-w-xs text-sm font-medium">'Bit of Light' program and 'Twinkle Stars' Kindergarten create a vibrant and supportive community.</div>
-                <div class="text-[10px] tracking-widest uppercase border border-black/20 px-4 py-1 rounded-full h-fit w-fit">Campus Life</div>
+                <div class="max-w-xs text-base font-medium">'Bit of Light' program and 'Twinkle Stars' Kindergarten create a vibrant and supportive community.</div>
+                <div class="text-sm tracking-widest uppercase border border-black/20 px-4 py-1 rounded-full h-fit w-fit">Campus Life</div>
             </div>
             <div class="panel-center">
                 <img src="/gallery/anniversary/1.jpeg" class="panel-img" alt="Community Life">
@@ -480,10 +531,10 @@
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20">
             <div>
                 <h2 class="title-font text-6xl md:text-8xl mb-10">GET IN<br>TOUCH</h2>
-                <div class="space-y-8 text-[10px] md:text-sm tracking-widest uppercase opacity-70">
+                <div class="space-y-8 text-sm tracking-widest uppercase opacity-70">
                     <div>
                         <p class="opacity-40 mb-2">Location</p>
-                        <p>Karukone, Kollam District, Kerala, 691506</p>
+                        <p>Karukone, Anchal, Kollam, Keralam, 691506</p>
                     </div>
                     <div>
                         <p class="opacity-40 mb-2">Phone</p>
@@ -497,10 +548,10 @@
             </div>
             <div class="flex flex-col justify-end">
                 <form class="space-y-6" id="contact-form">
-                    <input type="text" id="contact-name" placeholder="YOUR NAME" class="w-full bg-transparent border-b border-white/20 py-4 text-sm focus:outline-none focus:border-white transition-colors uppercase tracking-widest" required>
-                    <input type="email" id="contact-email" placeholder="YOUR EMAIL" class="w-full bg-transparent border-b border-white/20 py-4 text-sm focus:outline-none focus:border-white transition-colors uppercase tracking-widest" required>
-                    <textarea id="contact-message" placeholder="YOUR MESSAGE" rows="4" class="w-full bg-transparent border-b border-white/20 py-4 text-sm focus:outline-none focus:border-white transition-colors uppercase tracking-widest" required></textarea>
-                    <button type="submit" id="contact-submit" class="mt-10 border border-white px-10 py-4 text-[10px] tracking-[0.3em] uppercase hover:bg-white hover:text-black transition-all duration-500">Send Message</button>
+                    <input type="text" id="contact-name" placeholder="YOUR NAME" class="w-full bg-transparent border-b border-white/20 py-4 text-base focus:outline-none focus:border-white transition-colors uppercase tracking-widest" required>
+                    <input type="email" id="contact-email" placeholder="YOUR EMAIL" class="w-full bg-transparent border-b border-white/20 py-4 text-base focus:outline-none focus:border-white transition-colors uppercase tracking-widest" required>
+                    <textarea id="contact-message" placeholder="YOUR MESSAGE" rows="4" class="w-full bg-transparent border-b border-white/20 py-4 text-base focus:outline-none focus:border-white transition-colors uppercase tracking-widest" required></textarea>
+                    <button type="submit" id="contact-submit" class="mt-10 border border-white px-10 py-4 text-xs tracking-[0.3em] uppercase hover:bg-white hover:text-black transition-all duration-500">Send Message</button>
                 </form>
             </div>
         </div>
@@ -526,7 +577,7 @@
             </div>
         </div>
         
-        <div class="p-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-[10px] tracking-[0.3em] uppercase opacity-40 gap-6 text-center">
+        <div class="p-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-xs tracking-[0.3em] uppercase opacity-40 gap-6 text-center">
             <p>&copy; 2026 National Public School Karukone</p>
             <div class="flex gap-8">
                 <a href="#" class="hover:opacity-100 transition-opacity">Instagram</a>
@@ -537,7 +588,24 @@
     </footer>
 
     <script>
-        // --- 1. Mobile Menu Toggle ---
+        // --- 1. Theme Toggle ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        // Check for saved theme
+        if (localStorage.getItem('theme') === 'light') {
+            body.classList.add('light-mode');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('light-mode');
+            localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
+            
+            // Redraw wave canvas for theme
+            ctx.strokeStyle = body.classList.contains('light-mode') ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+        });
+
+        // --- 2. Mobile Menu Toggle ---
         const menuBtn = document.getElementById('menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
         const menuLines = menuBtn.querySelectorAll('span');
@@ -558,7 +626,7 @@
             });
         });
 
-        // --- 2. Lenis Smooth Scroll ---
+        // --- 3. Lenis Smooth Scroll ---
         const lenis = new Lenis({
             duration: 1.2,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -577,7 +645,7 @@
         });
         gsap.ticker.lagSmoothing(0, 0);
 
-        // --- 3. Custom Cursor ---
+        // --- 4. Custom Cursor ---
         const cursor = document.getElementById('cursor');
         const hoverTargets = document.querySelectorAll('.hover-target, a, button, input, textarea');
 
@@ -595,7 +663,7 @@
             target.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
         });
 
-        // --- 4. Hero Wave Canvas Animation ---
+        // --- 5. Hero Wave Canvas Animation ---
         const canvas = document.getElementById('waveCanvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -610,7 +678,7 @@
 
         function drawWaves() {
             ctx.clearRect(0, 0, width, height);
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.strokeStyle = body.classList.contains('light-mode') ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
             ctx.lineWidth = 1;
 
             const waveCount = window.innerWidth < 768 ? 12 : 20;
@@ -633,7 +701,7 @@
         }
         drawWaves();
 
-        // --- 5. GSAP Scroll Animations ---
+        // --- 6. GSAP Scroll Animations ---
         gsap.registerPlugin(ScrollTrigger);
 
         // Hero Parallax
@@ -649,13 +717,13 @@
             }
         });
 
-        // Theme Toggle
+        // Section Theme Toggle (GSAP trigger)
         ScrollTrigger.create({
             trigger: "#light-theme-trigger",
             start: "top center",
             end: "bottom bottom",
-            onEnter: () => document.body.classList.replace('theme-dark', 'theme-light'),
-            onLeaveBack: () => document.body.classList.replace('theme-light', 'theme-dark'),
+            onEnter: () => !body.classList.contains('light-mode') && body.classList.replace('theme-dark', 'theme-light'),
+            onLeaveBack: () => !body.classList.contains('light-mode') && body.classList.replace('theme-light', 'theme-dark'),
         });
 
         // Scaling Cross
@@ -772,7 +840,7 @@
             });
         }
 
-        // --- 6. Supabase Contact Form ---
+        // --- 7. Supabase Contact Form ---
         const SUPABASE_URL = 'https://yyjhynajujbmdhndaceg.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_3fanHy-uvbdQk3sJDNcgwA_foWvxvJB';
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);

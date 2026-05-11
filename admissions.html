@@ -20,7 +20,10 @@
         :root {
             --bg-dark: #0f0f0f;
             --text-light: #f4f4f0;
+            --bg-light: #f4f4f0;
+            --text-dark: #161616;
             --accent: #d4af37;
+            --transition: 0.6s cubic-bezier(0.7, 0, 0.3, 1);
         }
 
         body {
@@ -28,7 +31,9 @@
             color: var(--text-light);
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
+            transition: background-color var(--transition), color var(--transition);
         }
+        body.light-mode { background-color: var(--bg-light); color: var(--text-dark); }
 
         h1, h2, h3, .title-font {
             font-family: 'Anton', sans-serif;
@@ -50,16 +55,32 @@
         /* Form Styling */
         .form-input {
             width: 100%; background: transparent; border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding: 1rem 0; font-size: 14px; text-transform: uppercase; tracking-widest;
+            padding: 1rem 0; font-size: 16px; text-transform: uppercase; tracking-widest;
             color: white; transition: border-color 0.3s;
         }
+        .light-mode .form-input { color: black; border-color: rgba(0,0,0,0.1); }
         .form-input:focus { outline: none; border-color: var(--accent); }
-        .form-label { font-size: 10px; text-transform: uppercase; tracking-[0.2em]; opacity: 0.4; margin-top: 1.5rem; display: block; }
+        .form-label { font-size: 12px; text-transform: uppercase; tracking-[0.2em]; opacity: 0.4; margin-top: 1.5rem; display: block; }
 
         /* Navigation */
         nav a { position: relative; }
         nav a::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1px; background: currentColor; transition: width 0.3s ease; }
         nav a:hover::after { width: 100%; }
+
+        /* Theme Toggle */
+        #theme-toggle {
+            width: 40px; height: 20px; background: rgba(255,255,255,0.1);
+            border-radius: 20px; position: relative; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: background 0.3s;
+        }
+        .light-mode #theme-toggle { background: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.2); }
+        #theme-toggle::after {
+            content: ''; position: absolute; top: 2px; left: 2px;
+            width: 14px; height: 14px; background: white; border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+        .light-mode #theme-toggle::after { transform: translateX(20px); background: var(--text-dark); }
 
         /* Mobile Menu */
         #mobile-menu {
@@ -74,6 +95,7 @@
             transform: translateY(-100%);
             transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
         }
+        .light-mode #mobile-menu { background: var(--bg-light); }
         #mobile-menu.active { transform: translateY(0); }
         .mobile-link {
             font-family: 'Anton', sans-serif;
@@ -83,13 +105,16 @@
             color: var(--text-light);
             text-decoration: none;
         }
+        .light-mode .mobile-link { color: var(--text-dark); }
 
         .btn-submit {
             margin-top: 3rem; border: 1px solid white; padding: 1rem 3rem;
-            font-size: 10px; text-transform: uppercase; tracking-[0.3em];
+            font-size: 12px; text-transform: uppercase; tracking-[0.3em];
             transition: all 0.5s;
         }
+        .light-mode .btn-submit { border-color: black; }
         .btn-submit:hover { background: white; color: black; }
+        .light-mode .btn-submit:hover { background: black; color: white; }
     </style>
 </head>
 <body class="antialiased">
@@ -97,7 +122,7 @@
     <div class="cursor" id="cursor"></div>
 
     <!-- Navigation -->
-    <nav class="fixed top-0 w-full z-[100] flex justify-between items-center p-6 text-[10px] tracking-widest uppercase mix-blend-difference text-white">
+    <nav class="fixed top-0 w-full z-[100] flex justify-between items-center p-6 text-[12px] tracking-widest uppercase mix-blend-difference text-white">
         <a href="index.html" class="flex items-center gap-3">
             <img src="/logo.png" alt="NPS" class="h-10 w-auto">
             <span class="hidden sm:inline">NPS Karukone</span>
@@ -111,6 +136,7 @@
         </div>
         
         <div class="flex items-center gap-6">
+            <div id="theme-toggle" class="hover-target"></div>
             <a href="index.html#contact" class="hidden sm:inline">Contact</a>
             <!-- Hamburger -->
             <button id="menu-btn" class="md:hidden flex flex-col gap-1.5 focus:outline-none z-[300]">
@@ -133,7 +159,7 @@
     <main class="pt-32 pb-20 px-6 md:px-20 max-w-5xl">
         <header class="mb-20">
             <h1 class="title-font text-6xl md:text-9xl mb-4">ADMISSIONS</h1>
-            <p class="text-[10px] tracking-[0.4em] uppercase opacity-40 max-w-sm">Shape the future of your child. Apply now for the academic year 2026-27.</p>
+            <p class="text-sm tracking-[0.4em] uppercase opacity-40 max-w-sm">Shape the future of your child. Apply now for the academic year 2026-27.</p>
         </header>
 
         <form id="admissionForm" class="space-y-12">
@@ -185,11 +211,20 @@
         </form>
     </main>
 
-    <footer class="p-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-[10px] tracking-[0.3em] uppercase opacity-40 gap-6 text-center">
+    <footer class="p-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-sm tracking-[0.3em] uppercase opacity-40 gap-6 text-center">
         <p>&copy; 2026 National Public School Karukone</p>
     </footer>
 
     <script>
+        // --- Theme Toggle ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        if (localStorage.getItem('theme') === 'light') body.classList.add('light-mode');
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('light-mode');
+            localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
+        });
+
         // --- Mobile Menu ---
         const menuBtn = document.getElementById('menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
