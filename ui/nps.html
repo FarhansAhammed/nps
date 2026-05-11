@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>National Public School, Karukone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- Lenis for Smooth Scrolling like the video -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #161616;
+            --text-light: #f4f4f0;
+            --bg-light: #f4f4f0;
+            --text-dark: #161616;
+            --accent: #8ab69b;
+            --panel-1: #d8c8b8; /* Tan */
+            --panel-2: #df8fb5; /* Pink */
+            --panel-3: #8cb4d8; /* Blue */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* Lenis Smooth Scroll Recommended CSS */
+        html.lenis { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto !important; }
+        .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+        .lenis.lenis-stopped { overflow: hidden; }
+        .lenis.lenis-scrolling iframe { pointer-events: none; }
+
+        h1, h2, h3, .title-font {
+            font-family: 'Anton', sans-serif;
+            text-transform: uppercase;
+            line-height: 0.85;
+        }
+
+        /* Custom Cursor */
+        .cursor {
+            width: 15px;
+            height: 15px;
+            background-color: transparent;
+            border: 1.5px solid white;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background-color 0.3s, border-color 0.3s;
+            mix-blend-mode: difference;
+        }
+        .cursor.hovered {
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            border-color: white;
+            mix-blend-mode: normal;
+        }
+
+        /* Grid Overlay */
+        .grid-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            display: flex;
+            justify-content: space-evenly;
+        }
+        .grid-line {
+            width: 1px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.07);
+            transition: background 0.3s;
+        }
+        .theme-light .grid-line { background: rgba(0, 0, 0, 0.05); }
+
+        .text-outline {
+            color: transparent;
+            -webkit-text-stroke: 1.5px var(--text-light);
+        }
+
+        /* Hero */
+        #hero {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        #waveCanvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            opacity: 0.4;
+        }
+        .hero-title {
+            font-size: clamp(5rem, 13vw, 15rem);
+            white-space: nowrap;
+            letter-spacing: -0.02em;
+            text-align: center;
+        }
+
+        /* Values List */
+        .value-row {
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .value-row::before {
+            content: '';
+            position: absolute;
+            top: 100%; left: 0; width: 100%; height: 100%;
+            background: var(--accent);
+            transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: -1;
+        }
+        .value-row:hover::before { top: 0; }
+        .value-row:hover { color: var(--text-dark); padding-left: 2rem; }
+        .value-row:hover .text-outline { -webkit-text-stroke: 0; color: var(--text-dark); }
+
+        /* Cross Transition */
+        .cross-container {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-dark);
+            overflow: hidden;
+            position: relative;
+            z-index: 20;
+        }
+        .cross {
+            width: 15vw;
+            height: 15vw;
+            background: var(--bg-light);
+            /* Perfect Plus Sign */
+            clip-path: polygon(35% 0%, 65% 0%, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0% 65%, 0% 35%, 35% 35%);
+            transform-origin: center;
+            will-change: transform;
+        }
+
+        /* Stacked Panels (Light Theme) */
+        .light-section {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            position: relative;
+            z-index: 10;
+        }
+        .panel {
+            height: 100vh;
+            width: 100vw;
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+        .panel-top {
+            display: flex;
+            justify-content: space-between;
+            padding: 2rem 4rem;
+            margin-top: 60px; /* nav offset */
+        }
+        .panel-center {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 35%;
+            height: 55%;
+            overflow: hidden;
+        }
+        .panel-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Starts hidden from bottom */
+            clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
+            transform: scale(1.3);
+            transform-origin: center;
+        }
+        .panel-title {
+            font-size: clamp(6rem, 16vw, 20rem);
+            line-height: 0.75;
+            letter-spacing: -0.04em;
+            text-align: center;
+            width: 100%;
+            padding: 0 2rem;
+            margin-bottom: -2vw; /* Sit on the bottom edge */
+            white-space: nowrap;
+        }
+
+        /* Footer & 3D Marquee */
+        footer {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            overflow: hidden;
+            position: relative;
+            perspective: 1200px; /* Enable 3D space */
+        }
+        .marquee-wrapper {
+            white-space: nowrap;
+            padding: 8rem 0 2rem 0;
+            position: relative;
+            z-index: 10;
+            transform-style: preserve-3d;
+        }
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 25s linear infinite;
+        }
+        .marquee-text {
+            font-size: clamp(6rem, 22vw, 25rem);
+            padding-right: 50px;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Floating 3D Images */
+        .footer-images {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 20;
+            transform-style: preserve-3d;
+        }
+        .footer-img {
+            position: absolute;
+            width: 300px;
+            height: 220px;
+            object-fit: cover;
+            opacity: 0;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            will-change: transform, opacity;
+        }
+        /* Specific positioning */
+        .f-img-1 { top: 10%; left: 15%; z-index: 21; }
+        .f-img-2 { top: 50%; left: 35%; z-index: 25; width: 400px; height: 250px;}
+        .f-img-3 { top: 20%; left: 65%; z-index: 22; }
+        .f-img-4 { top: 60%; left: 75%; z-index: 24; width: 250px; height: 350px;}
+
+    </style>
+</head>
+<body class="theme-dark antialiased">
+
+    <!-- Custom Cursor -->
+    <div class="cursor" id="cursor"></div>
+
+    <!-- Background Grid Lines -->
+    <div class="grid-overlay">
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 flex justify-between items-center p-6 text-xs tracking-widest uppercase mix-blend-difference text-white">
+        <div>NPS Karukone <span class="opacity-50 ml-2">Est. 1995</span></div>
+        <div class="hidden md:flex gap-12 absolute left-1/2 -translate-x-1/2">
+            <a href="#" class="hover-target">Admissions</a>
+            <a href="#" class="hover-target">Curriculum</a>
+            <a href="#" class="hover-target">Campus Life</a>
+        </div>
+        <div>Kerala, IND</div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero">
+        <canvas id="waveCanvas"></canvas>
+        <div class="relative z-10 w-full flex flex-col items-center pt-10">
+            <h1 class="hero-title title-font">
+                <span class="block text-outline hero-text-anim">EMPOWERING</span>
+                <span class="block flex items-center justify-center gap-4 hero-text-anim">
+                    FUTURE
+                    <!-- Circular Badge replacing text -->
+                    <div class="w-20 h-20 md:w-32 md:h-32 rounded-full border border-white flex items-center justify-center text-[10px] md:text-xs font-sans tracking-widest uppercase text-white hover-target">
+                        Scroll
+                    </div>
+                </span>
+                <span class="block hero-text-anim">LEADERS</span>
+            </h1>
+        </div>
+    </section>
+
+    <!-- List / Values Section -->
+    <section class="relative z-10 bg-transparent border-b border-white/20">
+        <div class="flex flex-col md:flex-row">
+            <div class="w-full md:w-1/3 p-10 border-b md:border-b-0 md:border-r border-white/20 flex flex-col justify-between">
+                <h2 class="title-font text-5xl md:text-7xl">APPROACH TO<br>EDUCATION?</h2>
+                <p class="text-sm opacity-60 max-w-xs mt-10 md:mt-0">We focus on building an environment that feels inspiring from the first interaction. Excellence is considered at every stage.</p>
+            </div>
+            
+            <div class="w-full md:w-2/3 flex flex-col">
+                <!-- Item 1 -->
+                <div class="value-row flex items-center justify-between p-10 md:p-16 hover-target cursor-pointer">
+                    <div class="w-2/3 z-10">
+                        <h3 class="title-font text-5xl md:text-7xl mb-4">ACADEMIC FIRST</h3>
+                        <p class="text-sm opacity-80 font-sans max-w-md">Rigorous curriculum designed for long-term growth and scalability. We prioritize clear structure, deep understanding, and semantic knowledge.</p>
+                    </div>
+                    <div class="text-outline title-font text-8xl md:text-9xl z-10">01</div>
+                </div>
+                <!-- Item 2 -->
+                <div class="value-row flex items-center justify-between p-10 md:p-16 hover-target cursor-pointer">
+                    <div class="w-2/3 z-10">
+                        <h3 class="title-font text-5xl md:text-7xl mb-4">MODERN FACILITIES</h3>
+                        <p class="text-sm opacity-80 font-sans max-w-md">State-of-the-art labs and studios that create engaging interfaces for learning. We ensure stability, quality, and confidence in every subject.</p>
+                    </div>
+                    <div class="text-outline title-font text-8xl md:text-9xl z-10">02</div>
+                </div>
+                <!-- Item 3 -->
+                <div class="value-row flex items-center justify-between p-10 md:p-16 hover-target cursor-pointer">
+                    <div class="w-2/3 z-10">
+                        <h3 class="title-font text-5xl md:text-7xl mb-4">HOLISTIC DELIVERY</h3>
+                        <p class="text-sm opacity-80 font-sans max-w-md">From initial ideas to final graduation, we focus on thoughtful planning. Integrating sports and arts to build robust, dynamic individuals.</p>
+                    </div>
+                    <div class="text-outline title-font text-8xl md:text-9xl z-10">03</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scaling Cross Transition -->
+    <section class="cross-container" id="cross-section">
+        <div class="cross" id="scaling-cross"></div>
+    </section>
+
+    <!-- Light Theme Area (Stacked Panels) -->
+    <div class="light-section" id="light-theme-trigger">
+        
+        <div class="text-center py-32 border-b border-black/10 flex flex-col items-center justify-center min-h-[50vh]">
+            <p class="text-xs tracking-widest uppercase mb-4">+ WHAT YOU GET +</p>
+            <h2 class="title-font text-6xl md:text-9xl">READY TO BUILD<br>SOMETHING GREAT?</h2>
+        </div>
+
+        <!-- Panel 1 -->
+        <div class="panel" style="background-color: var(--panel-1); z-index: 1;">
+            <div class="panel-top">
+                <div class="max-w-xs text-sm">A structured progression from early years to senior secondary, ensuring a solid foundation.</div>
+                <div class="text-xs uppercase border border-black px-4 py-1 rounded-full h-fit">( Academics )</div>
+            </div>
+            <div class="panel-center">
+                <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1200&auto=format&fit=crop" class="panel-img" alt="Students">
+            </div>
+            <h2 class="panel-title text-outline" style="-webkit-text-stroke-color: black;">CURRICULUM</h2>
+        </div>
+
+        <!-- Panel 2 -->
+        <div class="panel" style="background-color: var(--panel-2); z-index: 2;">
+            <div class="panel-top">
+                <div class="max-w-xs text-sm">Interactive smart classrooms and fully equipped science labs for hands-on experimentation.</div>
+                <div class="text-xs uppercase border border-black px-4 py-1 rounded-full h-fit">( Infrastructure )</div>
+            </div>
+            <div class="panel-center">
+                <img src="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1200&auto=format&fit=crop" class="panel-img" alt="Lab">
+            </div>
+            <h2 class="panel-title text-outline" style="-webkit-text-stroke-color: black;">FACILITIES</h2>
+        </div>
+
+        <!-- Panel 3 -->
+        <div class="panel" style="background-color: var(--panel-3); z-index: 3;">
+            <div class="panel-top">
+                <div class="max-w-xs text-sm">Vibrant campus life driven by sports, arts, cultural fests, and community service.</div>
+                <div class="text-xs uppercase border border-black px-4 py-1 rounded-full h-fit">( Life )</div>
+            </div>
+            <div class="panel-center">
+                <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=1200&auto=format&fit=crop" class="panel-img" alt="Sports">
+            </div>
+            <h2 class="panel-title text-outline" style="-webkit-text-stroke-color: black;">COMMUNITY</h2>
+        </div>
+    </div>
+
+    <!-- Footer with 3D Image Scatter -->
+    <footer id="footer-section">
+        <div class="flex flex-col md:flex-row justify-between px-10 pt-20 pb-10 text-xs uppercase tracking-widest border-b border-white/20">
+            <div class="mb-10 md:mb-0">
+                <p>NPS Karukone</p>
+                <p class="opacity-50 mt-2">Kollam, Kerala - 691506</p>
+            </div>
+            <div class="flex gap-16 md:gap-32">
+                <div class="flex flex-col gap-3">
+                    <a href="#" class="hover-target">Overview</a>
+                    <a href="#" class="hover-target">Contact</a>
+                    <a href="#" class="hover-target">Admissions</a>
+                    <a href="#" class="hover-target">About</a>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <a href="#" class="hover-target">Instagram</a>
+                    <a href="#" class="hover-target">Facebook</a>
+                    <a href="#" class="hover-target">YouTube</a>
+                </div>
+            </div>
+            <div class="mt-10 md:mt-0 md:text-right">
+                <p>@2026 All Rights Reserved</p>
+            </div>
+        </div>
+
+        <div class="relative w-full h-[60vh] md:h-[80vh] flex items-center overflow-hidden" id="marquee-container">
+            <!-- Scattered Floating Images -->
+            <div class="footer-images">
+                <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=600&auto=format&fit=crop" class="footer-img f-img-1" alt="1">
+                <img src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?q=80&w=600&auto=format&fit=crop" class="footer-img f-img-2" alt="2">
+                <img src="https://images.unsplash.com/photo-1546410531-ea4cea48f566?q=80&w=600&auto=format&fit=crop" class="footer-img f-img-3" alt="3">
+                <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=600&auto=format&fit=crop" class="footer-img f-img-4" alt="4">
+            </div>
+
+            <!-- Giant Marquee Text -->
+            <div class="marquee-wrapper hover-target">
+                <div class="marquee-content title-font">
+                    <span class="marquee-text">NPS KARUKONE — NPS KARUKONE — </span>
+                    <span class="marquee-text">NPS KARUKONE — NPS KARUKONE — </span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. Lenis Smooth Scroll (Crucial for the video's feel) ---
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // standard easing
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+        });
+
+        lenis.on('scroll', ScrollTrigger.update);
+
+        gsap.ticker.add((time) => {
+            lenis.raf(time * 1000);
+        });
+        gsap.ticker.lagSmoothing(0, 0);
+
+        // --- 2. Custom Cursor ---
+        const cursor = document.getElementById('cursor');
+        const hoverTargets = document.querySelectorAll('.hover-target, a');
+
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, {
+                x: e.clientX,
+                y: e.clientY,
+                duration: 0.1,
+                ease: "power2.out"
+            });
+        });
+
+        hoverTargets.forEach(target => {
+            target.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            target.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+
+        // --- 3. Hero Wave Canvas Animation ---
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let time = 0;
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function drawWaves() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 1;
+
+            for (let i = 0; i < 25; i++) {
+                ctx.beginPath();
+                for (let x = 0; x <= width; x += 20) {
+                    // Topographic complex wave math
+                    let y = height / 2 + 
+                            Math.sin(x * 0.003 + time + i * 0.1) * 80 + 
+                            Math.cos(x * 0.002 - time + i * 0.05) * 120 +
+                            (i * 35) - 400; 
+                    
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+            time += 0.005;
+            requestAnimationFrame(drawWaves);
+        }
+        drawWaves();
+
+        // --- 4. GSAP Scroll Animations ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Hero Parallax
+        gsap.to('.hero-text-anim', {
+            y: 150,
+            opacity: 0,
+            stagger: 0.1,
+            scrollTrigger: {
+                trigger: '#hero',
+                start: 'top top',
+                end: 'bottom top',
+                scrub: true
+            }
+        });
+
+        // Theme Toggle Logic based on Light Section
+        ScrollTrigger.create({
+            trigger: "#light-theme-trigger",
+            start: "top center",
+            end: "bottom bottom",
+            onEnter: () => document.body.classList.replace('theme-dark', 'theme-light'),
+            onLeaveBack: () => document.body.classList.replace('theme-light', 'theme-dark'),
+        });
+
+        // The Scaling Cross Transition
+        const crossSection = document.getElementById('cross-section');
+        const cross = document.getElementById('scaling-cross');
+
+        gsap.to(cross, {
+            scale: 80, // Scale massively to fill viewport
+            ease: "power2.inOut",
+            scrollTrigger: {
+                trigger: crossSection,
+                start: "top top",
+                end: "+=150%", // Keep it pinned for 1.5x height
+                pin: true,
+                scrub: true
+            }
+        });
+
+        // Stacked Panels Animations
+        const panels = gsap.utils.toArray(".panel");
+        
+        panels.forEach((panel, i) => {
+            const img = panel.querySelector('.panel-img');
+            const title = panel.querySelector('.panel-title');
+            const topText = panel.querySelector('.panel-top');
+
+            // Parallax reveal for the image inside the panel
+            gsap.fromTo(img, 
+                { 
+                    clipPath: "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)", 
+                    scale: 1.5 
+                },
+                { 
+                    clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)", 
+                    scale: 1, 
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: panel,
+                        start: "top 80%", // Start revealing as panel slides up
+                        end: "top top",
+                        scrub: 1
+                    }
+                }
+            );
+
+            // Subtly parallax the huge bottom text
+            gsap.from(title, {
+                y: 100,
+                scrollTrigger: {
+                    trigger: panel,
+                    start: "top bottom",
+                    end: "top top",
+                    scrub: true
+                }
+            });
+            
+            // Fade in top description
+            gsap.from(topText, {
+                opacity: 0,
+                y: 20,
+                scrollTrigger: {
+                    trigger: panel,
+                    start: "top 50%",
+                    end: "top top",
+                    scrub: true
+                }
+            });
+        });
+
+        // --- 5. Footer 3D Hover & Scatter Effect ---
+        const footerImages = document.querySelectorAll('.footer-img');
+        const marqueeContainer = document.getElementById('marquee-container');
+
+        // Reveal images randomly when scrolling to footer
+        ScrollTrigger.create({
+            trigger: "footer",
+            start: "top 60%",
+            onEnter: () => {
+                footerImages.forEach((img, i) => {
+                    gsap.to(img, {
+                        opacity: 1,
+                        y: 0,
+                        rotationZ: gsap.utils.random(-15, 15),
+                        duration: 1.2,
+                        delay: i * 0.15,
+                        ease: "power4.out"
+                    });
+                });
+            },
+            onLeaveBack: () => {
+                gsap.to(footerImages, { opacity: 0, duration: 0.5 });
+            }
+        });
+
+        // 3D Mousemove Parallax on the footer
+        marqueeContainer.addEventListener('mousemove', (e) => {
+            const rect = marqueeContainer.getBoundingClientRect();
+            // Normalize mouse position from -1 to 1
+            const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            const y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+
+            // Move the marquee slightly
+            gsap.to('.marquee-wrapper', {
+                x: x * -50,
+                y: y * -20,
+                rotateX: y * 5,
+                rotateY: x * -5,
+                duration: 1,
+                ease: "power2.out"
+            });
+
+            // Move images with varying depths
+            footerImages.forEach((img, i) => {
+                const depth = (i + 1) * 30; // Further images move more
+                gsap.to(img, {
+                    x: x * depth,
+                    y: y * depth,
+                    rotateX: y * 20,
+                    rotateY: x * -20,
+                    duration: 1.5,
+                    ease: "power3.out"
+                });
+            });
+        });
+
+        // Reset on mouse leave
+        marqueeContainer.addEventListener('mouseleave', () => {
+            gsap.to('.marquee-wrapper', { x: 0, y: 0, rotateX: 0, rotateY: 0, duration: 1 });
+            gsap.to(footerImages, { x: 0, y: 0, rotateX: 0, rotateY: 0, duration: 1 });
+        });
+
+    </script>
+</body>
+</html>

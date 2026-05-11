@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery | National Public School Karukone</title>
+    <meta name="description" content="Explore the vibrant life and events at NPS Karukone through our gallery.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- Lenis -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0f0f0f;
+            --text-light: #f4f4f0;
+            --accent: #d4af37;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        h1, h2, .title-font {
+            font-family: 'Anton', sans-serif;
+            text-transform: uppercase;
+        }
+
+        /* Custom Cursor - Hidden on Touch Devices */
+        @media (pointer: coarse) {
+            .cursor { display: none !important; }
+            body { cursor: auto !important; }
+        }
+        .cursor {
+            width: 15px; height: 15px; border: 1.5px solid white; border-radius: 50%;
+            position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%);
+            mix-blend-mode: difference; transition: width 0.3s, height 0.3s, background-color 0.3s;
+        }
+        .cursor.hovered { width: 50px; height: 50px; background-color: white; mix-blend-mode: normal; }
+
+        /* Gallery Grid */
+        .gallery-item {
+            overflow: hidden;
+            border-radius: 4px;
+            aspect-ratio: 4/3;
+            background: #1a1a1a;
+            position: relative;
+        }
+        .gallery-item img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            filter: grayscale(0.5);
+        }
+        .gallery-item:hover img {
+            transform: scale(1.1);
+            filter: grayscale(0);
+        }
+        .gallery-item::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.8));
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .gallery-item:hover::after { opacity: 1; }
+
+        .category-tag {
+            position: absolute; bottom: 1rem; left: 1rem; z-index: 10;
+            font-size: 10px; text-transform: uppercase; tracking-widest;
+            background: var(--accent); color: black; padding: 2px 8px; border-radius: 2px;
+            opacity: 0; transform: translateY(10px); transition: all 0.3s ease;
+        }
+        .gallery-item:hover .category-tag { opacity: 1; transform: translateY(0); }
+
+        /* Navigation */
+        nav a { position: relative; }
+        nav a::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1px; background: currentColor; transition: width 0.3s ease; }
+        nav a:hover::after { width: 100%; }
+
+        /* Mobile Menu */
+        #mobile-menu {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--bg-dark);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transform: translateY(-100%);
+            transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+        #mobile-menu.active { transform: translateY(0); }
+        .mobile-link {
+            font-family: 'Anton', sans-serif;
+            font-size: 3rem;
+            text-transform: uppercase;
+            margin: 1rem 0;
+            color: var(--text-light);
+            text-decoration: none;
+        }
+
+        .filter-btn {
+            padding: 8px 16px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.1);
+            font-size: 10px; text-transform: uppercase; tracking-widest; transition: all 0.3s;
+        }
+        .filter-btn.active { background: white; color: black; border-color: white; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="cursor" id="cursor"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-[100] flex justify-between items-center p-6 text-[10px] tracking-widest uppercase mix-blend-difference text-white">
+        <a href="index.html" class="flex items-center gap-3">
+            <img src="/logo.png" alt="NPS" class="h-10 w-auto">
+            <span class="hidden sm:inline">NPS Karukone</span>
+        </a>
+        <div class="hidden md:flex gap-10">
+            <a href="index.html#about">About</a>
+            <a href="index.html#academics">Academics</a>
+            <a href="index.html#facilities">Facilities</a>
+            <a href="gallery.html" class="opacity-50">Gallery</a>
+            <a href="admissions.html">Admissions</a>
+        </div>
+        
+        <div class="flex items-center gap-6">
+            <a href="index.html#contact" class="hidden sm:inline">Contact</a>
+            <!-- Hamburger -->
+            <button id="menu-btn" class="md:hidden flex flex-col gap-1.5 focus:outline-none z-[300]">
+                <span class="w-6 h-0.5 bg-white transition-all duration-300"></span>
+                <span class="w-6 h-0.5 bg-white transition-all duration-300"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu">
+        <a href="index.html#about" class="mobile-link">About</a>
+        <a href="index.html#academics" class="mobile-link">Academics</a>
+        <a href="index.html#facilities" class="mobile-link">Facilities</a>
+        <a href="gallery.html" class="mobile-link">Gallery</a>
+        <a href="admissions.html" class="mobile-link">Admissions</a>
+        <a href="index.html#contact" class="mobile-link">Contact</a>
+    </div>
+
+    <main class="pt-32 pb-20">
+        <header class="px-6 md:px-12 mb-20">
+            <h1 class="title-font text-6xl md:text-9xl mb-4">MOMENTS</h1>
+            <p class="text-[10px] tracking-[0.4em] uppercase opacity-40 max-w-sm">A visual journey through our events, achievements, and daily school life.</p>
+        </header>
+
+        <!-- Filters -->
+        <div class="px-6 md:px-12 mb-10 flex flex-wrap gap-3" id="filters">
+            <button class="filter-btn active" data-filter="all">All Events</button>
+        </div>
+
+        <!-- Gallery Grid -->
+        <div class="px-6 md:px-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="gallery-grid">
+            <!-- Images will be injected -->
+        </div>
+    </main>
+
+    <footer class="p-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-[10px] tracking-[0.3em] uppercase opacity-40 gap-6 text-center">
+        <p>&copy; 2026 National Public School Karukone</p>
+        <div class="flex gap-8">
+            <a href="#">Instagram</a>
+            <a href="#">Facebook</a>
+            <a href="#">YouTube</a>
+        </div>
+    </footer>
+
+    <script>
+        // --- Mobile Menu ---
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuLines = menuBtn.querySelectorAll('span');
+
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('active');
+            menuLines[0].classList.toggle('rotate-45');
+            menuLines[0].classList.toggle('translate-y-2');
+            menuLines[1].classList.toggle('-rotate-45');
+            menuLines[1].classList.toggle('-translate-y-0.5');
+        });
+
+        const imageData = [
+            { path: "/gallery/95.jpeg", category: "Gallery", type: "image" },
+            { path: "/gallery/96.jpeg", category: "Gallery", type: "image" },
+            { path: "/gallery/97.jpeg", category: "Gallery", type: "image" },
+            { path: "/gallery/98.jpeg", category: "Gallery", type: "image" },
+            { path: "/gallery/99.jpeg", category: "Gallery", type: "image" },
+            { path: "/gallery/WhatsApp Video 2026-04-13 at 6.10.08 PM.mp4", category: "Gallery", type: "video" },
+            { path: "/gallery/WhatsApp Video 2026-05-11 at 5.12.18 PM.mp4", category: "Gallery", type: "video" },
+            { path: "/gallery/WhatsApp Video 2026-05-11 at 5.12.22 PM.mp4", category: "Gallery", type: "video" },
+            ...Array.from({length: 45}, (_, i) => ({ path: `/gallery/anniversary/${i+1}.jpeg`, category: "Anniversary", type: "image" })),
+            ...Array.from({length: 5}, (_, i) => ({ path: `/gallery/childerns day/${i+46}.jpeg`, category: "Childrens Day", type: "image" })),
+            ...Array.from({length: 10}, (_, i) => {
+                const num = i + 51;
+                if (num === 58) return null;
+                return { path: `/gallery/environmental day/${num}.jpeg`, category: "Environmental Day", type: "image" };
+            }).filter(Boolean),
+            ...Array.from({length: 3}, (_, i) => ({ path: `/gallery/free eye camp/${i+61}.jpeg`, category: "Free Eye Camp", type: "image" })),
+            { path: "/gallery/isro visit/64.jpeg", category: "ISRO Visit", type: "image" },
+            ...Array.from({length: 16}, (_, i) => ({ path: `/gallery/onam celebration/${i+65}.jpeg`, category: "Onam", type: "image" })),
+            ...Array.from({length: 5}, (_, i) => ({ path: `/gallery/quiz/${i+81}.jpeg`, category: "Quiz", type: "image" })),
+            ...Array.from({length: 4}, (_, i) => ({ path: `/gallery/republic day/${i+86}.jpeg`, category: "Republic Day", type: "image" })),
+            ...Array.from({length: 3}, (_, i) => ({ path: `/gallery/war protest/${i+90}.jpeg`, category: "War Protest", type: "image" })),
+            ...Array.from({length: 2}, (_, i) => ({ path: `/gallery/yoga/${i+93}.jpeg`, category: "Yoga", type: "image" }))
+        ];
+
+        const grid = document.getElementById('gallery-grid');
+        const filtersContainer = document.getElementById('filters');
+        const categories = [...new Set(imageData.map(img => img.category))];
+
+        categories.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = 'filter-btn';
+            btn.textContent = cat;
+            btn.dataset.filter = cat;
+            filtersContainer.appendChild(btn);
+        });
+
+        function renderGallery(filter = 'all') {
+            grid.innerHTML = '';
+            const filteredImages = filter === 'all' ? imageData : imageData.filter(img => img.category === filter);
+            
+            filteredImages.forEach((img, i) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.dataset.category = img.category;
+                
+                let mediaHtml = img.type === 'image' 
+                    ? `<img src="${img.path}" alt="${img.category}" loading="lazy">`
+                    : `<video src="${img.path}" muted loop playsinline class="w-full h-full object-cover"></video>`;
+
+                item.innerHTML = `${mediaHtml}<span class="category-tag">${img.category}</span>`;
+                grid.appendChild(item);
+
+                if (img.type === 'video') {
+                    item.addEventListener('mouseenter', () => item.querySelector('video').play());
+                    item.addEventListener('mouseleave', () => {
+                        const v = item.querySelector('video');
+                        v.pause(); v.currentTime = 0;
+                    });
+                }
+
+                gsap.from(item, { opacity: 0, y: 30, duration: 0.8, delay: (i % 8) * 0.05, ease: "power3.out" });
+            });
+        }
+
+        renderGallery();
+
+        filtersContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('filter-btn')) {
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                renderGallery(e.target.dataset.filter);
+            }
+        });
+
+        const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
+
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => { gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 }); });
+        document.querySelectorAll('a, button, .gallery-item').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+    </script>
+</body>
+</html>
